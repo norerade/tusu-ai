@@ -16,10 +16,6 @@ export const Stage1Hero: React.FC = () => {
     <div className="py-16 md:py-28 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-12">
       {/* Hero Header */}
       <div className="text-center space-y-6 max-w-3xl mx-auto">
-        <div className="anim-fade-in-up inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 anim-pulse-subtle" />
-          <span>LOCUS Startup Hackathon 2026 • Кейс 02</span>
-        </div>
 
         <h1 className="anim-fade-in-up anim-delay-1 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
           Перестань гуглить. Начни двигаться.
