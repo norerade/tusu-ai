@@ -19,13 +19,15 @@ const MainContent: React.FC = () => {
 
   return (
     <main className="flex-1 w-full flex flex-col">
-      {currentStage === 1 && <Stage1Hero />}
-      {currentStage === 2 && <Stage2Profile />}
-      {currentStage === 3 && <Stage3Diagnostic />}
-      {currentStage === 4 && <Stage4Recommendations />}
-      {currentStage === 5 && <Stage5Compare />}
-      {currentStage === 6 && <Stage6Roadmap />}
-      {currentStage === 7 && <Stage7NextAction />}
+      <div key={currentStage} className="anim-fade-in-up">
+        {currentStage === 1 && <Stage1Hero />}
+        {currentStage === 2 && <Stage2Profile />}
+        {currentStage === 3 && <Stage3Diagnostic />}
+        {currentStage === 4 && <Stage4Recommendations />}
+        {currentStage === 5 && <Stage5Compare />}
+        {currentStage === 6 && <Stage6Roadmap />}
+        {currentStage === 7 && <Stage7NextAction />}
+      </div>
     </main>
   );
 };

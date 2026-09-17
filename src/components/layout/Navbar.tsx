@@ -6,7 +6,6 @@ import {
   RotateCcw,
   FileText,
   ChevronDown,
-  Layers,
   Sparkles
 } from 'lucide-react';
 
@@ -32,14 +31,9 @@ export const Navbar: React.FC = () => {
           <div className="w-8 h-8 rounded-lg bg-zinc-100 text-zinc-950 flex items-center justify-center font-black text-sm tracking-tighter group-hover:bg-white transition-colors shadow-sm">
             TU
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="font-extrabold text-base tracking-tight text-zinc-100">
-              TUSU<span className="text-zinc-500 font-semibold">.AI</span>
-            </span>
-            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-zinc-800/80 text-zinc-400 border border-zinc-700/60">
-              LOCUSCASE2
-            </span>
-          </div>
+          <span className="font-extrabold text-base tracking-tight text-zinc-100">
+            TUSU<span className="text-zinc-500 font-semibold">.AI</span>
+          </span>
         </div>
 
         {/* Action Controls */}
