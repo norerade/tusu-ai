@@ -33,7 +33,7 @@ const MainContent: React.FC = () => {
 export function App() {
   return (
     <AppProvider>
-      <div className="min-h-screen flex flex-col bg-[#0b0f19] text-slate-100 selection:bg-cyan-500 selection:text-slate-950 font-sans">
+      <div className="min-h-screen flex flex-col bg-[#09090b] text-zinc-100 selection:bg-zinc-200 selection:text-zinc-950 font-sans bg-dots-subtle">
         <Navbar />
         <Stepper />
         <MainContent />

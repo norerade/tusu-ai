@@ -5,9 +5,7 @@ import {
   X,
   Calendar,
   Download,
-  CheckCircle2,
   Clock,
-  Sparkles,
   Smartphone
 } from 'lucide-react';
 
@@ -26,92 +24,89 @@ export const CalendarExportModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between gap-4 bg-slate-950/60">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              <Calendar className="w-6 h-6" />
-            </div>
+        <div className="p-5 border-b border-zinc-800 flex items-center justify-between gap-4 bg-zinc-950/60">
+          <div className="flex items-center gap-2.5">
+            <Calendar className="w-5 h-5 text-zinc-300" />
             <div>
-              <h3 className="text-lg font-bold text-white">Календарь дедлайнов поступления</h3>
-              <p className="text-xs text-slate-400">
-                Экспорт персональных сроков в Google Calendar, Apple iCal или Outlook
+              <h3 className="text-base font-bold text-white">Календарь контрольных дедлайнов</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Экспорт персонального расписания в iCal / Google Calendar
               </p>
             </div>
           </div>
 
           <button
             onClick={() => setIsCalendarModalOpen(false)}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto space-y-6">
-          {/* Quick Action Button */}
-          <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-cyan-950/20 to-slate-900 border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="text-sm font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-cyan-400" />
-                <span>Все {roadmapTasks.length} дедлайнов в одном файле</span>
+        <div className="p-5 overflow-y-auto space-y-5 text-xs text-zinc-300">
+          {/* Action Box */}
+          <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-between gap-4">
+            <div>
+              <div className="font-semibold text-zinc-100">
+                {roadmapTasks.length} дедлайнов в одном файле
               </div>
-              <p className="text-xs text-slate-400">
-                События с напоминаниями за 3 дня до дедлайна.
+              <p className="text-zinc-400 text-[11px] mt-0.5">
+                Включает даты тестов, дедлайны вузов и стипендий.
               </p>
             </div>
 
             <button
               onClick={handleDownload}
-              className="px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 cursor-pointer transition-all hover:scale-[1.02] shrink-0"
+              className="px-4 py-2.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-colors shrink-0 cursor-pointer"
             >
-              <Download className="w-4 h-4" />
-              <span>Скачать .ICS файл</span>
+              <Download className="w-3.5 h-3.5" />
+              <span>Скачать .ICS</span>
             </button>
           </div>
 
-          {/* How to import guide */}
-          <div className="space-y-3">
-            <div className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Smartphone className="w-4 h-4 text-indigo-400" />
-              <span>Инструкция по добавлению (10 секунд):</span>
+          {/* Guide */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-zinc-400">
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Инструкция по синхронизации:</span>
             </div>
-            <div className="grid sm:grid-cols-2 gap-3 text-xs text-slate-300">
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                <div className="font-bold text-cyan-300">iPhone / Mac / iPad:</div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Нажмите на скачанный файл <code className="text-cyan-400">.ics</code> — календарь Apple откроется автоматически и предложит нажать «Добавить все события».
+            <div className="grid sm:grid-cols-2 gap-2.5">
+              <div className="p-3 rounded-xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
+                <div className="font-semibold text-zinc-200">Apple Calendar / iOS:</div>
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  Откройте скачанный файл <code className="text-zinc-300">.ics</code> и нажмите «Добавить все».
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                <div className="font-bold text-cyan-300">Google Calendar / Android:</div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Откройте Настройки Google Календаря → «Импорт и экспорт» → Выберите скачанный файл и нажмите «Импортировать».
+              <div className="p-3 rounded-xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
+                <div className="font-semibold text-zinc-200">Google Calendar:</div>
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  Настройки Google Календаря → «Импорт и экспорт» → Загрузить файл.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Deadlines List Preview */}
-          <div className="space-y-3">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Ключевые события в вашем календаре ({roadmapTasks.length}):
+          {/* List */}
+          <div className="space-y-2">
+            <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">
+              Список событий:
             </div>
-            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
               {roadmapTasks.map((t) => (
                 <div
                   key={t.id}
-                  className="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3 text-xs"
+                  className="p-2.5 rounded-lg bg-zinc-950/50 border border-zinc-800/80 flex items-center justify-between gap-2"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Clock className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span className="font-medium text-slate-200 truncate">{t.title}</span>
+                  <div className="flex items-center gap-2 truncate">
+                    <Clock className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                    <span className="truncate text-zinc-200">{t.title}</span>
                   </div>
-                  <span className="text-[11px] font-bold text-indigo-300 shrink-0 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                  <span className="font-mono text-[10px] text-zinc-400 shrink-0">
                     {t.dueLabel}
                   </span>
                 </div>
@@ -121,10 +116,10 @@ export const CalendarExportModal: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/80 flex justify-end">
+        <div className="p-4 border-t border-zinc-800 bg-zinc-950/80 flex justify-end">
           <button
             onClick={() => setIsCalendarModalOpen(false)}
-            className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition-colors cursor-pointer"
           >
             Закрыть
           </button>

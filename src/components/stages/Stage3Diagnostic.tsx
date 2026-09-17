@@ -2,15 +2,12 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   Activity,
-  CheckCircle2,
-  AlertTriangle,
+  Check,
+  AlertCircle,
   Target,
-  Compass,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
-  TrendingUp,
-  Award
+  SlidersHorizontal
 } from 'lucide-react';
 
 export const Stage3Diagnostic: React.FC = () => {
@@ -18,127 +15,122 @@ export const Stage3Diagnostic: React.FC = () => {
 
   return (
     <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-300">
-      {/* Step Header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-semibold">
-            <Activity className="w-3.5 h-3.5" />
-            <span>Этап 3 из 7</span> • <span>AI-диагностика профиля</span>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 font-mono text-xs text-zinc-400">
+            <span>03 / АУДИТ ПОСТУПЛЕНИЯ</span>
+            <span>•</span>
+            <span>СТРАТЕГИЧЕСКИЙ ОТЧЕТ</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            Диагностический отчет абитуриента
+            Диагностический аудит абитуриента
           </h1>
-          <p className="text-sm text-slate-400">
-            Объективная оценка академических сил, выявление узких мест и стратегия поступления.
+          <p className="text-sm text-zinc-400">
+            Объективная оценка академических баллов, рисков и рекомендованная формула подачи.
           </p>
         </div>
 
         <button
           onClick={() => setCurrentStage(2)}
-          className="self-start sm:self-auto px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium border border-slate-700 transition-colors"
+          className="self-start sm:self-auto px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-medium border border-zinc-800 transition-colors flex items-center gap-2 cursor-pointer"
         >
-          Редактировать анкету
+          <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400" />
+          <span>Редактировать параметры</span>
         </button>
       </div>
 
-      {/* Hero Diagnostic Card */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-900/90 to-indigo-950/30 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
-        {/* Glow accent */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
-
+      {/* Overview Card */}
+      <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 sm:p-8 space-y-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
-            <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase tracking-wider">
-              <Sparkles className="w-4 h-4" />
-              <span>Резюме профиля: {profile.name || 'Абитуриент'}</span>
+            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-zinc-400">
+              <Activity className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Профиль: {profile.name || 'Абитуриент'}</span>
             </div>
-            <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-normal">
+            <p className="text-sm sm:text-base text-zinc-200 leading-relaxed font-normal">
               {diagnostics.summary}
             </p>
 
-            {/* Educational Goal */}
-            <div className="p-3.5 rounded-xl bg-slate-950/80 border border-cyan-500/20 flex items-start gap-3">
-              <Target className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
+            {/* Formulated Goal */}
+            <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800 flex items-start gap-3">
+              <Target className="w-4 h-4 text-zinc-400 shrink-0 mt-0.5" />
               <div>
-                <div className="text-[11px] font-bold text-cyan-300 uppercase tracking-wider">
+                <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
                   Сформулированная образовательная цель
                 </div>
-                <div className="text-xs sm:text-sm font-semibold text-white mt-0.5">
+                <div className="text-xs sm:text-sm font-semibold text-zinc-100 mt-0.5">
                   {diagnostics.educationalGoal}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Readiness Score Meter */}
-          <div className="p-5 rounded-2xl bg-slate-950/90 border border-slate-800/80 flex flex-col items-center justify-center text-center shrink-0 w-full md:w-52 space-y-2 shadow-inner">
-            <div className="text-xs text-slate-400 font-medium">Индекс готовности</div>
-            <div className="relative flex items-center justify-center">
-              <span className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">
-                {diagnostics.readinessScore}%
-              </span>
+          {/* Readiness Index */}
+          <div className="p-5 rounded-2xl bg-zinc-950 border border-zinc-800 flex flex-col items-center justify-center text-center shrink-0 w-full md:w-48 space-y-2">
+            <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
+              Индекс готовности
             </div>
-            <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+            <div className="font-mono text-4xl font-extrabold text-white">
+              {diagnostics.readinessScore}%
+            </div>
+            <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-emerald-400 rounded-full transition-all duration-700"
+                className="h-full bg-emerald-400 rounded-full transition-all duration-500"
                 style={{ width: `${diagnostics.readinessScore}%` }}
               />
             </div>
-            <span className="text-[10px] text-slate-400">
+            <span className="text-[10px] font-mono text-zinc-400">
               {diagnostics.readinessScore >= 75
                 ? 'Высокая конкурентность'
                 : diagnostics.readinessScore >= 55
-                ? 'Хорошая база, требуется добор тестов'
-                : 'Требуется ранняя подготовка'}
+                ? 'Базовый порог закрыт'
+                : 'Нужен ранний добор'}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Strengths & Limitations Two-Column Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
+      {/* Two Column Breakdown: Strengths & Bottlenecks */}
+      <div className="grid md:grid-cols-2 gap-4">
         {/* Strengths */}
-        <div className="bg-slate-900/50 border border-emerald-500/20 rounded-2xl p-6 space-y-4 backdrop-blur-sm">
-          <div className="flex items-center gap-2.5 text-emerald-400 font-bold text-base">
-            <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-              <CheckCircle2 className="w-5 h-5" />
-            </div>
-            <span>Сильные стороны и преимущества</span>
+        <div className="bg-zinc-900/40 border border-zinc-800/90 rounded-2xl p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span className="font-mono text-xs uppercase tracking-wider text-zinc-300 font-semibold">
+              Конкурентные преимущества
+            </span>
           </div>
 
-          <ul className="space-y-3">
+          <ul className="space-y-2.5">
             {diagnostics.strengths.map((item, idx) => (
               <li
                 key={idx}
-                className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs sm:text-sm text-slate-200"
+                className="flex items-start gap-3 p-3 rounded-xl bg-zinc-950/60 border border-zinc-800/80 text-xs sm:text-sm text-zinc-200 leading-relaxed"
               >
-                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                  ✓
-                </span>
+                <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <span>{item}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Limitations & Bottlenecks */}
-        <div className="bg-slate-900/50 border border-amber-500/20 rounded-2xl p-6 space-y-4 backdrop-blur-sm">
-          <div className="flex items-center gap-2.5 text-amber-400 font-bold text-base">
-            <div className="p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-            <span>Ограничения, риски и дефициты</span>
+        {/* Bottlenecks */}
+        <div className="bg-zinc-900/40 border border-zinc-800/90 rounded-2xl p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
+            <span className="font-mono text-xs uppercase tracking-wider text-zinc-300 font-semibold">
+              Узкие места и риски дедлайнов
+            </span>
           </div>
 
-          <ul className="space-y-3">
+          <ul className="space-y-2.5">
             {diagnostics.limitations.map((item, idx) => (
               <li
                 key={idx}
-                className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs sm:text-sm text-slate-200"
+                className="flex items-start gap-3 p-3 rounded-xl bg-zinc-950/60 border border-zinc-800/80 text-xs sm:text-sm text-zinc-200 leading-relaxed"
               >
-                <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                  !
-                </span>
+                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <span>{item}</span>
               </li>
             ))}
@@ -146,26 +138,23 @@ export const Stage3Diagnostic: React.FC = () => {
         </div>
       </div>
 
-      {/* Recommended Strategy Banner */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-indigo-950/30 border border-indigo-500/30 flex items-start gap-4">
-        <div className="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-300 shrink-0">
-          <TrendingUp className="w-6 h-6" />
-        </div>
+      {/* Recommended Strategy Formula */}
+      <div className="p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800 flex items-start gap-4">
         <div className="space-y-1">
-          <div className="text-xs font-bold text-indigo-300 uppercase tracking-wider">
-            Рекомендуемая стратегия поступления
+          <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
+            Рекомендованная стратегия портфеля программ
           </div>
-          <p className="text-sm text-slate-200 leading-relaxed">
+          <p className="text-sm text-zinc-200 leading-relaxed">
             {diagnostics.recommendedStrategy}
           </p>
         </div>
       </div>
 
-      {/* Stage Navigation */}
-      <div className="flex items-center justify-between pt-4">
+      {/* Navigation */}
+      <div className="flex items-center justify-between pt-2">
         <button
           onClick={() => setCurrentStage(2)}
-          className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 flex items-center gap-2 cursor-pointer transition-colors"
+          className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-medium border border-zinc-800 flex items-center gap-2 cursor-pointer transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Назад к анкете</span>
@@ -173,9 +162,9 @@ export const Stage3Diagnostic: React.FC = () => {
 
         <button
           onClick={() => setCurrentStage(4)}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-sm font-bold shadow-lg shadow-indigo-500/20 flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.02]"
+          className="px-6 py-3 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold shadow-sm flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.01]"
         >
-          <span>Смотреть рекомендации вузов (Этап 4)</span>
+          <span>Рекомендации университетов (Этап 4)</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
