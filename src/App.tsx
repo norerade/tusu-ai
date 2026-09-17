@@ -13,6 +13,7 @@ import { Stage7NextAction } from './components/stages/Stage7NextAction';
 import { EssayAdvisorModal } from './components/extra/EssayAdvisorModal';
 import { CalendarExportModal } from './components/extra/CalendarExportModal';
 import { UniversityDetailModal } from './components/extra/UniversityDetailModal';
+import { AccountHub } from './components/extra/AccountHub';
 
 const MainContent: React.FC = () => {
   const { currentStage } = useApp();
@@ -40,6 +41,7 @@ export function App() {
         <Stepper />
         <MainContent />
         <Footer />
+        <AccountHub />
 
         {/* Global Action Modals */}
         <EssayAdvisorModal />

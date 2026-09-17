@@ -22,9 +22,7 @@ export const Stage1Hero: React.FC = () => {
         </div>
 
         <h1 className="anim-fade-in-up anim-delay-1 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
-          Абитуриенту нужен{' '}
-          <span className="underline decoration-zinc-600 underline-offset-8">маршрут</span>,
-          а не ещё один список
+          Перестань гуглить. Начни двигаться.
         </h1>
 
         <p className="anim-fade-in-up anim-delay-2 text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
@@ -43,7 +41,7 @@ export const Stage1Hero: React.FC = () => {
 
           <button
             onClick={() => loadPreset(DEMO_PRESETS[0])}
-            className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800/80 text-zinc-300 border border-zinc-800 hover:border-zinc-700 font-medium text-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="hidden w-full sm:w-auto px-6 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800/80 text-zinc-300 border border-zinc-800 hover:border-zinc-700 font-medium text-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Sparkles className="w-4 h-4 text-zinc-400" />
             <span>Демо для жюри (1 клик)</span>
@@ -68,7 +66,7 @@ export const Stage1Hero: React.FC = () => {
       </div>
 
       {/* Compact Jury Presets Row */}
-      <div className="anim-fade-in-up anim-delay-5 grid sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
+      <div className="hidden anim-fade-in-up anim-delay-5 grid sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
         {DEMO_PRESETS.map((preset) => (
           <button
             key={preset.id}

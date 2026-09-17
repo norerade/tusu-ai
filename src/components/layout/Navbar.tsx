@@ -39,7 +39,7 @@ export const Navbar: React.FC = () => {
         {/* Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Quick Jury Presets Dropdown */}
-          <div className="relative group">
+          <div className="hidden relative group">
             <button
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 hover:border-zinc-600 transition-colors cursor-pointer"
               title="Готовые профили абитуриентов для быстрой проверки жюри"
