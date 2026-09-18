@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
+import { getEarliestTargetYear } from '../../utils/admissionCycle';
 import { StudyField, TargetCountry, BudgetTier, EducationLevel, UserProfile } from '../../types';
 import {
   User,
@@ -30,13 +31,13 @@ const TARGET_COUNTRIES: { id: TargetCountry; label: string; flag: string; hint: 
 
 export const Stage2Profile: React.FC = () => {
   const { profile, updateProfile, setCurrentStage } = useApp();
+  const targetYears = Array.from({ length: 3 }, (_, index) => getEarliestTargetYear() + index);
+  const isProfileComplete = profile.name.trim().length > 0 && profile.fields.length > 0 && profile.targetCountries.length > 0;
 
   const handleFieldToggle = (field: StudyField) => {
     const current = profile.fields;
     if (current.includes(field)) {
-      if (current.length > 1) {
-        updateProfile({ fields: current.filter((f) => f !== field) });
-      }
+      updateProfile({ fields: current.filter((f) => f !== field) });
     } else {
       updateProfile({ fields: [...current, field] });
     }
@@ -45,9 +46,7 @@ export const Stage2Profile: React.FC = () => {
   const handleCountryToggle = (country: TargetCountry) => {
     const current = profile.targetCountries;
     if (current.includes(country)) {
-      if (current.length > 1) {
-        updateProfile({ targetCountries: current.filter((c) => c !== country) });
-      }
+      updateProfile({ targetCountries: current.filter((c) => c !== country) });
     } else {
       updateProfile({ targetCountries: [...current, country] });
     }
@@ -118,9 +117,9 @@ export const Stage2Profile: React.FC = () => {
                 onChange={(e) => updateProfile({ targetYear: parseInt(e.target.value) })}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-sm focus:border-zinc-500 focus:outline-none transition-colors"
               >
-                <option value={2026}>Осень 2026 (Основной цикл)</option>
-                <option value={2027}>Осень 2027</option>
-                <option value={2028}>Осень 2028</option>
+                {targetYears.map((year) => (
+                  <option key={year} value={year}>Осень {year}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -174,18 +173,30 @@ export const Stage2Profile: React.FC = () => {
               </div>
               <input
                 type="range"
-                min="3.0"
-                max="5.0"
+                min={profile.gpaScale === '4.0' ? '2.0' : '3.0'}
+                max={profile.gpaScale}
                 step="0.05"
                 value={profile.gpa}
                 onChange={(e) => updateProfile({ gpa: parseFloat(e.target.value) })}
                 className="w-full accent-zinc-200 cursor-pointer"
               />
               <div className="flex justify-between text-[10px] font-mono text-zinc-400">
-                <span>3.0</span>
-                <span>4.0</span>
-                <span>5.0</span>
+                <span>{profile.gpaScale === '4.0' ? '2.0' : '3.0'}</span>
+                <span>{profile.gpaScale === '4.0' ? '3.0' : '4.0'}</span>
+                <span>{profile.gpaScale}</span>
               </div>
+              <select
+                value={profile.gpaScale}
+                onChange={(e) => {
+                  const gpaScale = e.target.value as UserProfile['gpaScale'];
+                  const gpa = gpaScale === '4.0' ? Math.min(4, (profile.gpa / 5) * 4) : Math.min(5, (profile.gpa / 4) * 5);
+                  updateProfile({ gpaScale, gpa: Number(gpa.toFixed(2)) });
+                }}
+                className="w-full px-2 py-1 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-[11px]"
+              >
+                <option value="5.0">Шкала 5.0</option>
+                <option value="4.0">Шкала 4.0</option>
+              </select>
             </div>
 
             {/* IELTS */}
@@ -211,6 +222,24 @@ export const Stage2Profile: React.FC = () => {
                 <option value="7.5">7.5 (Отличный балл)</option>
                 <option value="8.0">8.0+ (Near native)</option>
               </select>
+            </div>
+
+            {/* TOEFL */}
+            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-zinc-400 font-medium">TOEFL iBT</span>
+                <span className="text-xs font-mono font-bold text-zinc-100">{profile.toefl ?? 'Нет'}</span>
+              </div>
+              <input type="number" min="0" max="120" value={profile.toefl ?? ''} onChange={(e) => updateProfile({ toefl: e.target.value ? parseInt(e.target.value) : null })} placeholder="Напр. 90" className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-xs" />
+            </div>
+
+            {/* Duolingo */}
+            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-zinc-400 font-medium">Duolingo English Test</span>
+                <span className="text-xs font-mono font-bold text-zinc-100">{profile.duolingo ?? 'Нет'}</span>
+              </div>
+              <input type="number" min="10" max="160" step="5" value={profile.duolingo ?? ''} onChange={(e) => updateProfile({ duolingo: e.target.value ? parseInt(e.target.value) : null })} placeholder="Напр. 120" className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-xs" />
             </div>
 
             {/* SAT */}
@@ -382,13 +411,21 @@ export const Stage2Profile: React.FC = () => {
           <span>Назад</span>
         </button>
 
-        <button
+        <div className="flex flex-col items-end gap-1.5">
+          {!isProfileComplete && (
+            <p className="text-right text-[11px] text-amber-300">
+              Укажите имя, хотя бы одно направление и страну, чтобы получить персональный расчёт.
+            </p>
+          )}
+          <button
           onClick={() => setCurrentStage(3)}
+          disabled={!isProfileComplete}
           className="px-6 py-3 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold shadow-sm flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.01]"
         >
           <span>Перейти к диагностике (Этап 3)</span>
           <ArrowRight className="w-4 h-4" />
-        </button>
+          </button>
+        </div>
       </div>
     </div>
   );

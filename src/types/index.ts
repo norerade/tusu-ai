@@ -13,11 +13,11 @@ export type TargetCountry =
   | 'eu_germany'
   | 'eu_italy'
   | 'usa'
-  | 'asia_korea'
-  | 'asia_singapore'
-  | 'online';
+  | 'asia_korea';
 
 export type BudgetTier = 'grant_only' | 'low_5k' | 'mid_15k' | 'high_30k_plus';
+export type ScholarshipCoverage = 'full' | 'partial' | 'competitive';
+export type AdmissionRoute = 'nu_internal' | 'kz_grant' | 'kz_direct' | 'international_direct';
 
 export interface UserProfile {
   name: string;
@@ -56,8 +56,11 @@ export interface UniversityProgram {
   tuitionUsdPerYear: number;
   livingCostUsdPerYear: number;
   scholarshipAvailable: boolean;
+  /** Реальное покрытие, а не просто факт наличия стипендии. */
+  scholarshipCoverage: ScholarshipCoverage;
   scholarshipName: string;
   scholarshipDetails: string;
+  admissionRoute?: AdmissionRoute;
   minGpa: number;
   minIelts: number;
   minSat?: number;
@@ -75,8 +78,8 @@ export interface UniversityProgram {
 export interface ScoredRecommendation {
   university: UniversityProgram;
   tier: RecommendationTier;
-  matchScore: number; // 0 - 100%
-  chanceCategory: 'Высокие (75-90%)' | 'Средние (50-74%)' | 'Конкурентные (30-49%)' | 'Экстремальные (<30%)';
+  matchScore: number; // Индекс соответствия профиля, не вероятность зачисления
+  chanceCategory: 'Требования закрыты' | 'Нужно закрыть требования' | 'Высокая неопределённость конкурса';
   whyItFits: {
     title: string;
     points: string[];

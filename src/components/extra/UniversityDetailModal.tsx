@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
+import { getDeadlineForTargetYear } from '../../utils/admissionCycle';
 import {
   X,
   ExternalLink,
@@ -12,7 +13,8 @@ export const UniversityDetailModal: React.FC = () => {
   const {
     selectedUniForDetail,
     setSelectedUniForDetail,
-    setIsEssayModalOpen
+    setIsEssayModalOpen,
+    profile
   } = useApp();
 
   if (!selectedUniForDetail) return null;
@@ -85,9 +87,9 @@ export const UniversityDetailModal: React.FC = () => {
 
             <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-zinc-800 space-y-1">
               <div className="text-[10px] font-mono font-semibold uppercase text-zinc-400">Сроки приема:</div>
-              <div className="font-semibold text-zinc-200">{uni.deadlineLabel}</div>
+              <div className="font-semibold text-zinc-200">{getDeadlineForTargetYear(uni.applicationDeadline, uni.deadlineLabel, profile.targetYear).label}</div>
               <div className="text-[11px] text-zinc-400 mt-1">
-                Семестр начала: Осень 2026
+                Семестр начала: Осень {profile.targetYear}
               </div>
             </div>
           </div>

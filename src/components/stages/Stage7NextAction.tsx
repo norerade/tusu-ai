@@ -6,8 +6,7 @@ import {
   Calendar,
   ArrowLeft,
   Clock,
-  Compass,
-  FileText
+  Compass
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 

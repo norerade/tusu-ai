@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { UNIVERSITIES } from '../../data/universities';
+import { getDeadlineForTargetYear } from '../../utils/admissionCycle';
 import {
   GitCompare,
   ArrowRight,
@@ -15,10 +16,14 @@ export const Stage5Compare: React.FC = () => {
     comparedUniIds,
     toggleCompareUni,
     setCurrentStage,
-    profile
+    profile,
+    recommendations
   } = useApp();
 
   const comparedUnis = UNIVERSITIES.filter(u => comparedUniIds.includes(u.id));
+  const comparedRecommendations = recommendations.filter(rec => comparedUniIds.includes(rec.university.id));
+  const bestOption = comparedRecommendations[0]?.university;
+  const nextBestOption = comparedRecommendations[1]?.university;
   const isReady = comparedUnis.length >= 2;
 
   return (
@@ -84,8 +89,8 @@ export const Stage5Compare: React.FC = () => {
             </div>
             <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
               С учетом вашего текущего профиля (GPA {profile.gpa.toFixed(2)}, {profile.ielts ? `IELTS ${profile.ielts}` : 'IELTS в подготовке'}, бюджет: {profile.budget === 'grant_only' ? '100% грант' : 'семейный'}),{' '}
-              <strong className="text-white">{comparedUnis[0]?.name}</strong> обеспечивает наименьший риск отклонения и доступ к полной стипендиальной программе, а{' '}
-              <strong className="text-white">{comparedUnis[1]?.name}</strong> выступает как сильный стратегический таргет для международной мобильности. Рекомендуется готовить пакет документов параллельно.
+              <strong className="text-white">{bestOption?.name}</strong> имеет наивысшее соответствие текущему профилю среди выбранных вариантов, а{' '}
+              <strong className="text-white">{nextBestOption?.name}</strong> — следующий по соответствию. Условия финансирования и конкурс на стипендию проверяйте отдельно для каждой программы.
             </p>
           </div>
 
@@ -141,6 +146,9 @@ export const Stage5Compare: React.FC = () => {
                   {comparedUnis.map((uni) => (
                     <td key={uni.id} className="p-4 border-l border-zinc-800">
                       <div className="font-medium text-white">{uni.scholarshipName}</div>
+                      <div className="mt-0.5 text-[10px] font-mono text-amber-300">
+                        {uni.scholarshipCoverage === 'full' ? 'Полное покрытие возможно' : uni.scholarshipCoverage === 'partial' ? 'Частичное покрытие' : 'Конкурсное финансирование'}
+                      </div>
                       <div className="text-[11px] text-zinc-400 mt-0.5">{uni.scholarshipDetails}</div>
                     </td>
                   ))}
@@ -173,7 +181,7 @@ export const Stage5Compare: React.FC = () => {
                   <td className="p-4 font-mono text-zinc-400 text-[11px] uppercase">Дедлайн подачи</td>
                   {comparedUnis.map((uni) => (
                     <td key={uni.id} className="p-4 border-l border-zinc-800 font-mono text-zinc-200">
-                      {uni.deadlineLabel}
+                      {getDeadlineForTargetYear(uni.applicationDeadline, uni.deadlineLabel, profile.targetYear).label}
                     </td>
                   ))}
                 </tr>

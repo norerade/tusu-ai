@@ -8,9 +8,9 @@ import {
   DemoPreset
 } from '../types';
 import { UNIVERSITIES } from '../data/universities';
-import { DEMO_PRESETS } from '../data/presets';
 import { computeRecommendations, generateDiagnostics } from '../utils/recommendationEngine';
 import { generatePersonalRoadmap } from '../utils/roadmapGenerator';
+import { getEarliestTargetYear } from '../utils/admissionCycle';
 
 export type StageNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
@@ -38,28 +38,55 @@ interface AppContextType {
 }
 
 const DEFAULT_PROFILE: UserProfile = {
-  name: 'Алихан Сарсенов',
+  // Стартовое состояние не содержит демо-данных: пользователь заполняет анкету с нуля.
+  name: '',
   level: 'grade_11',
-  targetYear: 2026,
-  fields: ['cs_it'],
-  gpa: 4.85,
+  targetYear: getEarliestTargetYear(),
+  fields: [],
+  gpa: 3.0,
   gpaScale: '5.0',
-  targetCountries: ['kz', 'eu_germany', 'asia_korea', 'usa'],
+  targetCountries: [],
   budget: 'grant_only',
-  ielts: 7.5,
-  sat: 1440,
-  ent: 128,
+  ielts: null,
+  sat: null,
+  ent: null,
   toefl: null,
   duolingo: null,
-  olympiadLevel: 'republic',
-  hasVolunteeringOrProjects: true,
-  notes: 'Призер олимпиад по программированию, проект на Python.'
+  olympiadLevel: 'none',
+  hasVolunteeringOrProjects: false,
+  notes: ''
 };
 
 const STORAGE_KEY_PROFILE = 'admitroute_profile_v1';
 const STORAGE_KEY_STAGE = 'admitroute_stage_v1';
 const STORAGE_KEY_TASKS = 'admitroute_tasks_completed_v1';
 const STORAGE_KEY_COMPARE = 'admitroute_compare_v1';
+
+const isProfileComplete = (profile: UserProfile) => (
+  profile.name.trim().length > 0 && profile.fields.length > 0 && profile.targetCountries.length > 0
+);
+
+const loadStoredProfile = (): UserProfile => {
+  const saved = localStorage.getItem(STORAGE_KEY_PROFILE);
+  if (!saved) return DEFAULT_PROFILE;
+
+  try {
+    const stored = JSON.parse(saved) as Partial<UserProfile>;
+    return {
+      ...DEFAULT_PROFILE,
+      ...stored,
+      // Старые сохранения не должны открывать уже прошедший набор.
+      targetYear: Math.max(stored.targetYear ?? getEarliestTargetYear(), getEarliestTargetYear())
+    };
+  } catch {
+    return DEFAULT_PROFILE;
+  }
+};
+
+const ROADMAP_INPUT_KEYS: (keyof UserProfile)[] = [
+  'level', 'targetYear', 'fields', 'gpa', 'gpaScale', 'targetCountries', 'budget',
+  'ielts', 'sat', 'ent', 'toefl', 'duolingo', 'olympiadLevel', 'hasVolunteeringOrProjects'
+];
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -69,22 +96,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const saved = localStorage.getItem(STORAGE_KEY_STAGE);
     if (saved) {
       const n = parseInt(saved);
-      if (n >= 1 && n <= 7) return n as StageNumber;
+      if (n >= 1 && n <= 7) {
+        return n >= 3 && !isProfileComplete(loadStoredProfile()) ? 2 : n as StageNumber;
+      }
     }
     return 1;
   });
 
-  const [profile, setProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY_PROFILE);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        // fallback
-      }
-    }
-    return DEFAULT_PROFILE;
-  });
+  const [profile, setProfile] = useState<UserProfile>(loadStoredProfile);
 
   const [completedTaskIds, setCompletedTaskIds] = useState<string[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY_TASKS);
@@ -107,7 +126,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // fallback
       }
     }
-    return ['nu-cs', 'kaist-cs']; // По умолчанию сравниваем NU и KAIST
+    return [];
   });
 
   const [selectedUniForDetail, setSelectedUniForDetail] = useState<UniversityProgram | null>(null);
@@ -132,26 +151,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [comparedUniIds]);
 
   const setCurrentStage = (stage: StageNumber) => {
+    // Нельзя показывать «персональный» расчет без минимально заполненной анкеты.
+    if (stage >= 3 && !isProfileComplete(profile)) {
+      setCurrentStageState(2);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     setCurrentStageState(stage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const updateProfile = (updates: Partial<UserProfile>) => {
+    const changesRoadmap = ROADMAP_INPUT_KEYS.some((key) => key in updates);
+    if (changesRoadmap) setCompletedTaskIds([]);
     setProfile(prev => ({ ...prev, ...updates }));
   };
 
   const loadPreset = (preset: DemoPreset) => {
-    setProfile(preset.profile);
+    setProfile({
+      ...preset.profile,
+      // Старые демонстрационные сценарии не должны формировать план с прошедшими сроками.
+      targetYear: Math.max(preset.profile.targetYear, getEarliestTargetYear())
+    });
     setCompletedTaskIds([]);
-    setCurrentStage(3); // Сразу переводим жюри на экран диагностики для оценки
+    setCurrentStageState(3); // Сразу переводим жюри на экран диагностики для оценки
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const resetAll = () => {
-    setProfile(DEFAULT_PROFILE);
-    setCompletedTaskIds([]);
-    setComparedUniIds(['nu-cs', 'kaist-cs']);
-    setCurrentStage(1);
+    // Очищаем также данные AccountHub, которые живут в localStorage отдельно.
     localStorage.clear();
+    // Сбрасываем всё состояние компонентов за один раз, как при первом открытии сайта.
+    window.location.reload();
   };
 
   // Реактивный пересчет рекомендаций
@@ -180,13 +211,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const toggleCompareUni = (uniId: string) => {
+    if (!comparedUniIds.includes(uniId) && comparedUniIds.length >= 3) {
+      window.alert('В сравнении может быть не больше трёх программ. Удалите один вариант, чтобы добавить другой.');
+      return;
+    }
+
     setComparedUniIds(prev => {
       if (prev.includes(uniId)) {
         return prev.filter(id => id !== uniId);
-      }
-      if (prev.length >= 3) {
-        // Ограничение: максимум 3 для сравнения
-        return [...prev.slice(1), uniId];
       }
       return [...prev, uniId];
     });

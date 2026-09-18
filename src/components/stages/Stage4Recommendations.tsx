@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { RecommendationTier } from '../../types';
+import { getDeadlineForTargetYear } from '../../utils/admissionCycle';
+import { getAdmissionRoute } from '../../utils/admissionRoute';
 import {
   ExternalLink,
   GitCompare,
@@ -22,7 +24,8 @@ export const Stage4Recommendations: React.FC = () => {
     toggleCompareUni,
     setCurrentStage,
     setSelectedUniForDetail,
-    setIsEssayModalOpen
+    setIsEssayModalOpen,
+    profile
   } = useApp();
 
   const [activeTierFilter, setActiveTierFilter] = useState<'all' | RecommendationTier>('all');
@@ -39,19 +42,19 @@ export const Stage4Recommendations: React.FC = () => {
       case 'dream':
         return (
           <span className="px-2.5 py-0.5 rounded text-[11px] font-mono font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
-            Dream (Амбициозный)
+            Требуется усиление
           </span>
         );
       case 'target':
         return (
           <span className="px-2.5 py-0.5 rounded text-[11px] font-mono font-medium bg-zinc-800 text-zinc-200 border border-zinc-600">
-            Target (Реалистичный)
+            Требования в работе
           </span>
         );
       case 'safety':
         return (
           <span className="px-2.5 py-0.5 rounded text-[11px] font-mono font-medium bg-emerald-950/40 text-emerald-400 border border-emerald-800/60">
-            Safety (Надежный)
+            Базовые требования закрыты
           </span>
         );
     }
@@ -71,7 +74,7 @@ export const Stage4Recommendations: React.FC = () => {
             Рекомендованные университеты и программы
           </h1>
           <p className="text-sm text-zinc-400">
-            Каждая программа сопоставлена с вашим GPA, экзаменами и возможностями 100% финансирования.
+            Каждая программа сопоставлена с вашим GPA, экзаменами и условиями финансирования.
           </p>
         </div>
 
@@ -130,6 +133,8 @@ export const Stage4Recommendations: React.FC = () => {
       <div className="space-y-4">
         {filteredRecommendations.map((rec) => {
           const uni = rec.university;
+          const deadline = getDeadlineForTargetYear(uni.applicationDeadline, uni.deadlineLabel, profile.targetYear);
+          const admissionRoute = getAdmissionRoute(uni);
           const isCompared = comparedUniIds.includes(uni.id);
 
           return (
@@ -164,13 +169,20 @@ export const Stage4Recommendations: React.FC = () => {
                 {/* Match Score */}
                 <div className="flex flex-row md:flex-col items-start md:items-end justify-between gap-2 shrink-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-zinc-400">Матч профиля:</span>
+                    <span className="text-xs text-zinc-400">Индекс соответствия:</span>
                     <span className="font-mono text-sm font-bold text-white px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700">
                       {rec.matchScore}%
                     </span>
                   </div>
                   <div className="text-[11px] text-zinc-400 font-mono">
-                    Вероятность: <span className="text-zinc-200 font-medium">{rec.chanceCategory}</span>
+                    Статус требований: <span className="text-zinc-200 font-medium">{rec.chanceCategory}</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-zinc-800 space-y-1">
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Как подать</div>
+                    <div className="text-xs font-semibold text-zinc-200">{admissionRoute.title}</div>
+                    <p className="text-[11px] leading-relaxed text-zinc-400">{admissionRoute.steps}</p>
+                    <p className="text-[10px] leading-relaxed text-amber-300">{admissionRoute.disclaimer}</p>
                   </div>
                 </div>
               </div>
@@ -233,7 +245,7 @@ export const Stage4Recommendations: React.FC = () => {
                       <span>Пороги тестов</span>
                     </div>
                     <div className="font-semibold text-zinc-100">
-                      IELTS {uni.minIelts}+ {uni.minSat ? `• SAT ${uni.minSat}+` : ''} {uni.minEnt ? `• ЕНТ ${uni.minEnt}+` : ''}
+                      {uni.minIelts > 0 ? `IELTS ${uni.minIelts}+` : 'Языковой тест не заявлен'} {uni.minSat ? `• SAT ${uni.minSat}+` : ''} {uni.minEnt ? `• ЕНТ ${uni.minEnt}+` : ''}
                     </div>
                     <div className="text-[10px] text-zinc-400 mt-0.5">
                       Мин. GPA: {uni.minGpa}
@@ -246,10 +258,10 @@ export const Stage4Recommendations: React.FC = () => {
                       <span>Дедлайн</span>
                     </div>
                     <div className="font-semibold text-zinc-100 truncate">
-                      {uni.deadlineLabel.split(' ')[0]} {uni.deadlineLabel.split(' ')[1]}
+                      {deadline.label.split(' ')[0]} {deadline.label.split(' ')[1]}
                     </div>
                     <div className="text-[10px] text-zinc-400 mt-0.5 truncate">
-                      {uni.deadlineLabel}
+                      {deadline.label}
                     </div>
                   </div>
 

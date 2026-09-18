@@ -80,8 +80,8 @@
 
 ```bash
 # 1. Клонировать репозиторий
-git clone <URL_РЕПОЗИТОРИЯ>
-cd admitroute-ai
+git clone https://github.com/norerade/tusu-ai
+cd tusu-ai
 
 # 2. Установить зависимости
 npm install

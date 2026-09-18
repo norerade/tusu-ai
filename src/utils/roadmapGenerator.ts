@@ -1,4 +1,6 @@
 import { UserProfile, ScoredRecommendation, RoadmapTask } from '../types';
+import { getDeadlineForTargetYear } from './admissionCycle';
+import { getBestLanguageTest } from './recommendationEngine';
 
 /**
  * Генерация персональной дорожной карты поступления
@@ -10,6 +12,7 @@ export function generatePersonalRoadmap(
   const topUni = recommendations[0]?.university;
   const targetYear = profile.targetYear;
   const currentYear = targetYear - 1; // Например, 2025 для поступления в 2026
+  const languageTest = getBestLanguageTest(profile);
 
   const tasks: RoadmapTask[] = [];
 
@@ -19,7 +22,7 @@ export function generatePersonalRoadmap(
   const q1Title = `Q1 (Сентябрь — Ноябрь ${currentYear}): Экзамены и академический профиль`;
 
   // Экзамен IELTS
-  if (!profile.ielts || profile.ielts < 6.5) {
+  if (!languageTest || languageTest.ieltsEquivalent < 6.5) {
     tasks.push({
       id: 'task-ielts-reg',
       quarter: 'Q1',
@@ -117,6 +120,7 @@ export function generatePersonalRoadmap(
 
   // Ранний дедлайн (Early rounds / KAIST / NU)
   if (topUni) {
+    const deadline = getDeadlineForTargetYear(topUni.applicationDeadline, topUni.deadlineLabel, targetYear);
     tasks.push({
       id: 'task-early-submission',
       quarter: 'Q2',
@@ -124,8 +128,8 @@ export function generatePersonalRoadmap(
       title: `Подача заявки в ${topUni.name}`,
       description: `Финальная загрузка анкеты на портале вуза (${topUni.officialSourceUrl}) до официального дедлайна.`,
       category: 'documents',
-      dueDate: topUni.applicationDeadline,
-      dueLabel: topUni.deadlineLabel,
+      dueDate: deadline.date,
+      dueLabel: deadline.label,
       priority: 'critical',
       isCompleted: false,
       relatedUniversityId: topUni.id,
@@ -212,15 +216,17 @@ export function generatePersonalRoadmap(
  * Определение текущего приоритетного следующего действия (Stage 7)
  */
 export function getImmediateNextAction(tasks: RoadmapTask[]): RoadmapTask | null {
-  // Ищем первую невыполненную задачу с критическим приоритетом, затем с важным
+  // Просроченные задачи важнее будущих; внутри каждой группы приоритет — по ближайшему сроку.
+  const today = new Date().toISOString().slice(0, 10);
   const uncompleted = tasks.filter(t => !t.isCompleted);
   if (uncompleted.length === 0) return null;
 
-  const critical = uncompleted.find(t => t.priority === 'critical');
-  if (critical) return critical;
-
-  const important = uncompleted.find(t => t.priority === 'important');
-  if (important) return important;
-
-  return uncompleted[0];
+  const priorityWeight = { critical: 0, important: 1, recommended: 2 };
+  return [...uncompleted].sort((a, b) => {
+    const aOverdue = a.dueDate < today;
+    const bOverdue = b.dueDate < today;
+    if (aOverdue !== bOverdue) return aOverdue ? -1 : 1;
+    if (a.dueDate !== b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+    return priorityWeight[a.priority] - priorityWeight[b.priority];
+  })[0];
 }

@@ -62,7 +62,7 @@ export const Stepper: React.FC = () => {
         {/* Desktop Pipeline View */}
         <nav aria-label="Progress" className="hidden sm:block">
           <ol className="flex items-center justify-between gap-2 w-full">
-            {STEPS.map((step, idx) => {
+            {STEPS.map((step) => {
               const isCurrent = currentStage === step.number;
               const isPast = currentStage > step.number;
 

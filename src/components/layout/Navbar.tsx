@@ -115,11 +115,17 @@ export const Navbar: React.FC = () => {
 
           {/* Reset */}
           <button
-            onClick={resetAll}
-            title="Сбросить все данные"
-            className="p-1.5 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 rounded-lg transition-colors cursor-pointer"
+            onClick={() => {
+              if (window.confirm('Очистить анкету, прогресс и тестовые данные? Приложение откроется как для нового пользователя.')) {
+                resetAll();
+              }
+            }}
+            title="Начать заново: очистить все данные"
+            aria-label="Начать заново и очистить все данные"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-lg transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Начать заново</span>
           </button>
         </div>
       </div>
