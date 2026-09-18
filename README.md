@@ -80,7 +80,7 @@
 
 ```bash
 # 1. Клонировать репозиторий
-git clone https://github.com/norerade/tusu-ai
+git clone <URL_РЕПОЗИТОРИЯ>
 cd tusu-ai
 
 # 2. Установить зависимости

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/layout/Navbar';
 import { Stepper } from './components/layout/Stepper';
@@ -10,10 +10,10 @@ import { Stage4Recommendations } from './components/stages/Stage4Recommendations
 import { Stage5Compare } from './components/stages/Stage5Compare';
 import { Stage6Roadmap } from './components/stages/Stage6Roadmap';
 import { Stage7NextAction } from './components/stages/Stage7NextAction';
-import { EssayAdvisorModal } from './components/extra/EssayAdvisorModal';
-import { CalendarExportModal } from './components/extra/CalendarExportModal';
-import { UniversityDetailModal } from './components/extra/UniversityDetailModal';
-import { AccountHub } from './components/extra/AccountHub';
+const EssayAdvisorModal = lazy(() => import('./components/extra/EssayAdvisorModal').then(module => ({ default: module.EssayAdvisorModal })));
+const CalendarExportModal = lazy(() => import('./components/extra/CalendarExportModal').then(module => ({ default: module.CalendarExportModal })));
+const UniversityDetailModal = lazy(() => import('./components/extra/UniversityDetailModal').then(module => ({ default: module.UniversityDetailModal })));
+const AccountHub = lazy(() => import('./components/extra/AccountHub').then(module => ({ default: module.AccountHub })));
 
 const MainContent: React.FC = () => {
   const { currentStage } = useApp();
@@ -41,15 +41,16 @@ export function App() {
         <Stepper />
         <MainContent />
         <Footer />
-        <AccountHub />
-
-        {/* Global Action Modals */}
-        <EssayAdvisorModal />
-        <CalendarExportModal />
-        <UniversityDetailModal />
+        <Suspense fallback={null}>
+          <AccountHub />
+          <EssayAdvisorModal />
+          <CalendarExportModal />
+          <UniversityDetailModal />
+        </Suspense>
       </div>
     </AppProvider>
   );
 }
 
 export default App;
+

@@ -37,6 +37,9 @@ export const Stage4Recommendations: React.FC = () => {
     return matchesTier && matchesCountry;
   });
 
+  if (recommendations.length === 0) {
+    return <div className="py-16 px-4 max-w-3xl mx-auto text-center"><h1 className="text-2xl font-bold text-white">Рекомендации появятся после заполнения профиля</h1><p className="mt-3 text-sm text-zinc-400">Укажите направление, страны, GPA и подтверждённые экзамены — мы покажем только доступные программы.</p><button onClick={() => setCurrentStage(2)} className="mt-6 rounded-xl bg-zinc-100 px-5 py-3 text-sm font-semibold text-zinc-950">Заполнить профиль</button></div>;
+  }
   const getTierBadge = (tier: RecommendationTier) => {
     switch (tier) {
       case 'dream':
@@ -130,7 +133,7 @@ export const Stage4Recommendations: React.FC = () => {
       </div>
 
       {/* Program Cards Grid */}
-      <div className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {filteredRecommendations.map((rec) => {
           const uni = rec.university;
           const deadline = getDeadlineForTargetYear(uni.applicationDeadline, uni.deadlineLabel, profile.targetYear);
@@ -147,7 +150,7 @@ export const Stage4Recommendations: React.FC = () => {
               }`}
             >
               {/* Header */}
-              <div className="p-5 sm:p-6 border-b border-zinc-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="p-4 border-b border-zinc-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-bold text-lg text-white">{uni.name}</h3>
@@ -188,7 +191,7 @@ export const Stage4Recommendations: React.FC = () => {
               </div>
 
               {/* Body */}
-              <div className="p-5 sm:p-6 space-y-4">
+              <div className="p-4 space-y-4">
                 {/* Why it fits */}
                 <div className="p-4 rounded-xl bg-zinc-950/70 border border-zinc-800/80 space-y-2.5">
                   <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">

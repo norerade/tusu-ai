@@ -11,20 +11,6 @@ export function normalizeGpa(gpa: number, scale: '4.0' | '5.0'): number {
   return gpa;
 }
 
-export function getBestLanguageTest(profile: UserProfile): { label: string; ieltsEquivalent: number } | null {
-  const tests: { label: string; ieltsEquivalent: number }[] = [];
-  if (profile.ielts !== null) tests.push({ label: `IELTS ${profile.ielts}`, ieltsEquivalent: profile.ielts });
-  if (profile.toefl !== null) {
-    const equivalent = profile.toefl >= 110 ? 7.5 : profile.toefl >= 100 ? 7 : profile.toefl >= 90 ? 6.5 : profile.toefl >= 78 ? 6 : profile.toefl >= 60 ? 5.5 : 5;
-    tests.push({ label: `TOEFL iBT ${profile.toefl}`, ieltsEquivalent: equivalent });
-  }
-  if (profile.duolingo !== null) {
-    const equivalent = profile.duolingo >= 135 ? 7.5 : profile.duolingo >= 125 ? 7 : profile.duolingo >= 115 ? 6.5 : profile.duolingo >= 105 ? 6 : profile.duolingo >= 95 ? 5.5 : 5;
-    tests.push({ label: `Duolingo English Test ${profile.duolingo}`, ieltsEquivalent: equivalent });
-  }
-  return tests.sort((a, b) => b.ieltsEquivalent - a.ieltsEquivalent)[0] ?? null;
-}
-
 /**
  * Анализ профиля и расчет скоринга рекомендаций
  */
@@ -33,9 +19,19 @@ export function computeRecommendations(
   universities: UniversityProgram[] = UNIVERSITIES
 ): ScoredRecommendation[] {
   const normGpa = normalizeGpa(profile.gpa, profile.gpaScale);
-  const languageTest = getBestLanguageTest(profile);
+  const extra = profile.examScores || {};
+  if (profile.gpa < 1 || profile.fields.length === 0 || profile.targetCountries.length === 0) return [];
+  const eligible = (uni: UniversityProgram) => {
+    if (!profile.fields.includes(uni.field) || !profile.targetCountries.includes(uni.country) || normGpa < uni.minGpa) return false;
+    const hasEnglish = (profile.ielts || extra.ielts || 0) >= uni.minIelts || (profile.toefl || extra.toefl || 0) >= uni.minIelts * 15;
+    if (uni.minIelts > 0 && !hasEnglish) return false;
+    if (uni.id === 'nu-cs') return (profile.sat || extra.sat || 0) >= (uni.minSat || 0) || (extra.nuet || 0) >= 110;
+    if (uni.minSat && (profile.sat || extra.sat || 0) < uni.minSat) return false;
+    if (uni.minEnt && (profile.ent || extra.ent || 0) < uni.minEnt) return false;
+    return true;
+  };
 
-  const scoredList: ScoredRecommendation[] = universities.map((uni) => {
+  const scoredList: ScoredRecommendation[] = universities.filter(eligible).map((uni) => {
     let score = 50; // Базовый скор
     const matchReasons: string[] = [];
     const risks: string[] = [];
@@ -68,13 +64,13 @@ export function computeRecommendations(
     }
 
     // 4. Языковой тест (IELTS)
-    if (uni.minIelts > 0 && languageTest && languageTest.ieltsEquivalent >= uni.minIelts) {
+    if (profile.ielts !== null && profile.ielts >= uni.minIelts) {
       score += 15;
-      matchReasons.push(`${languageTest.label} закрывает языковое требование (эквивалент IELTS ${uni.minIelts}+)`);
-    } else if (uni.minIelts > 0 && languageTest) {
+      matchReasons.push(`Уровень IELTS ${profile.ielts} полностью закрывает требование (мин. ${uni.minIelts})`);
+    } else if (profile.ielts !== null && profile.ielts < uni.minIelts) {
       score -= 15;
-      risks.push(`${languageTest.label} ниже требуемого языкового уровня (эквивалент IELTS ${uni.minIelts}+)`);
-    } else if (uni.minIelts > 0) {
+      risks.push(`Требуется пересдача IELTS: у вас ${profile.ielts}, вуз требует ${uni.minIelts}`);
+    } else {
       // IELTS не сдан
       risks.push(`Сертификат IELTS пока не сдан (для поступления нужен балл от ${uni.minIelts})`);
       score -= 10;
@@ -115,26 +111,20 @@ export function computeRecommendations(
       scholarships.push(`${uni.scholarshipName}: ${uni.scholarshipDetails}`);
     }
 
-    const hasFullFundingPath = uni.tuitionUsdPerYear === 0 || uni.scholarshipCoverage === 'full';
-
     if (profile.budget === 'grant_only') {
-      if (hasFullFundingPath) {
+      if (uni.tuitionUsdPerYear === 0 || uni.scholarshipAvailable) {
         score += 15;
         matchReasons.push('100% возможность учиться без оплаты за счет гранта/стипендии');
       } else {
         score -= 35;
-        risks.push(
-          uni.scholarshipAvailable
-            ? 'Стипендия доступна только на конкурсной или частичной основе и не гарантирует 100% покрытия.'
-            : `Высокая стоимость обучения ($${uni.tuitionUsdPerYear}/год) при нулевом бюджете`
-        );
+        risks.push(`Высокая стоимость обучения ($${uni.tuitionUsdPerYear}/год) при нулевом бюджете`);
       }
     } else if (profile.budget === 'low_5k') {
       if (uni.tuitionUsdPerYear <= 5000) {
         score += 10;
-      } else if (!hasFullFundingPath) {
+      } else if (!uni.scholarshipAvailable) {
         score -= 20;
-        risks.push(`Стоимость программы ($${uni.tuitionUsdPerYear}) превышает комфортный лимит ($5,000/год), а полного покрытия нет.`);
+        risks.push(`Стоимость программы ($${uni.tuitionUsdPerYear}) превышает комфортный лимит ($5,000/год)`);
       }
     }
 
@@ -143,19 +133,22 @@ export function computeRecommendations(
 
     // Определение категории (Dream / Target / Safety)
     let tier: RecommendationTier = 'target';
-    let chanceCategory: ScoredRecommendation['chanceCategory'] = 'Высокая неопределённость конкурса';
+    let chanceCategory: ScoredRecommendation['chanceCategory'] = 'Средние (50-74%)';
 
-    const hasUnmetRequirement = risks.some(risk => /ниже|Требуется|не сдан|требует|нужен|превышает|не гарантирует/i.test(risk));
+    const isTopAcceptance = parseInt(uni.acceptanceRate) <= 15;
 
-    if (!hasUnmetRequirement && finalScore >= 75) {
+    if (finalScore >= 80 && !isTopAcceptance) {
       tier = 'safety';
-      chanceCategory = 'Требования закрыты';
-    } else if (finalScore >= 60) {
+      chanceCategory = 'Высокие (75-90%)';
+    } else if (finalScore >= 70 && !isTopAcceptance) {
       tier = 'target';
-      chanceCategory = 'Нужно закрыть требования';
+      chanceCategory = 'Средние (50-74%)';
+    } else if (finalScore >= 60 || isTopAcceptance) {
+      tier = 'dream';
+      chanceCategory = finalScore >= 75 ? 'Конкурентные (30-49%)' : 'Экстремальные (<30%)';
     } else {
       tier = 'dream';
-      chanceCategory = 'Высокая неопределённость конкурса';
+      chanceCategory = 'Конкурентные (30-49%)';
     }
 
     return {
@@ -170,7 +163,7 @@ export function computeRecommendations(
           ? `Ваш GPA (${profile.gpa.toFixed(2)}) полностью удовлетворяет академическому порогу программы.`
           : `Требуется усилить академический средний балл (порог ${uni.minGpa}).`,
         financialFit: uni.scholarshipAvailable
-          ? `${uni.scholarshipName}: ${uni.scholarshipCoverage === 'full' ? 'есть путь к полному покрытию.' : uni.scholarshipCoverage === 'partial' ? 'покрывает часть расходов.' : 'конкурсное финансирование, его получение не гарантировано.'}`
+          ? `Доступна стипендия/грант: ${uni.scholarshipName}. Покрывает обучение полностью или частично.`
           : `Стоимость обучения составляет ~$${uni.tuitionUsdPerYear} в год + проживание ~$${uni.livingCostUsdPerYear}.`,
         careerFit: uni.careerProspects
       },
@@ -191,7 +184,6 @@ export function generateDiagnostics(
   recommendations: ScoredRecommendation[]
 ): DiagnosticReport {
   const normGpa = normalizeGpa(profile.gpa, profile.gpaScale);
-  const languageTest = getBestLanguageTest(profile);
   const strengths: string[] = [];
   const limitations: string[] = [];
 
@@ -202,10 +194,10 @@ export function generateDiagnostics(
     strengths.push(`Уверенный средний балл (GPA ${profile.gpa.toFixed(2)}), достаточный для большинства бакалаврских программ.`);
   }
 
-  if (languageTest && languageTest.ieltsEquivalent >= 7.0) {
-    strengths.push(`Высокий уровень английского (${languageTest.label}): дает преимущество при поступлении.`);
-  } else if (languageTest && languageTest.ieltsEquivalent >= 6.0) {
-    strengths.push(`Рабочий уровень английского (${languageTest.label}), покрывающий стандартные требования.`);
+  if (profile.ielts && profile.ielts >= 7.0) {
+    strengths.push(`Высокий уровень английского (IELTS ${profile.ielts}): освобождает от языковых курсов и дает преимущество.`);
+  } else if (profile.ielts && profile.ielts >= 6.0) {
+    strengths.push(`Рабочий уровень английского (IELTS ${profile.ielts}), покрывающий стандартные требования.`);
   }
 
   if (profile.sat && profile.sat >= 1350) {
@@ -229,7 +221,7 @@ export function generateDiagnostics(
   }
 
   // Ограничения и риски
-  if (!languageTest || languageTest.ieltsEquivalent < 6.0) {
+  if (!profile.ielts || profile.ielts < 6.0) {
     limitations.push('Отсутствие подтвержденного сертификата IELTS 6.5+ — главный барьер для зарубежных грантов прямо сейчас.');
   }
 
@@ -241,7 +233,7 @@ export function generateDiagnostics(
     limitations.push('Для американских вузов критически не хватает внеклассной активности и лидерского портфолио.');
   }
 
-  if (profile.level === 'grade_11' && (!profile.sat || !languageTest)) {
+  if (profile.level === 'grade_11' && (!profile.sat || !profile.ielts)) {
     limitations.push('Сжатые сроки (11 класс): необходимо сдать экзамены в первой половине учебного года до основных дедлайнов.');
   }
 
@@ -252,7 +244,7 @@ export function generateDiagnostics(
   // Расчет индекса готовности (Readiness Score)
   let readiness = 45;
   if (normGpa >= 4.5) readiness += 15;
-  if (languageTest && languageTest.ieltsEquivalent >= 6.5) readiness += 15;
+  if (profile.ielts && profile.ielts >= 6.5) readiness += 15;
   if (profile.sat && profile.sat >= 1300) readiness += 15;
   if (profile.ent && profile.ent >= 105) readiness += 10;
   if (profile.olympiadLevel !== 'none') readiness += 10;

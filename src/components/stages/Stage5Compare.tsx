@@ -3,7 +3,6 @@ import { useApp } from '../../context/AppContext';
 import { UNIVERSITIES } from '../../data/universities';
 import { getDeadlineForTargetYear } from '../../utils/admissionCycle';
 import {
-  GitCompare,
   ArrowRight,
   ArrowLeft,
   ExternalLink,
